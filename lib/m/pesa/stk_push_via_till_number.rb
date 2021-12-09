@@ -36,7 +36,7 @@ module M
         parsed_body = JSON.parse(response.read_body)
 
         if parsed_body.key?("errorCode")
-          error = OpenStruct.new(error_code: parsed_body["errorCode"], error_message: parsed_body["errorMessage"])
+          error = OpenStruct.new(error_code: parsed_body["errorCode"], error_message: parsed_body["errorMessage"], request_id: parsed_body["requestId"])
           OpenStruct.new(result: nil, error: error)
         else
           result = OpenStruct.new(
@@ -44,7 +44,7 @@ module M
             checkout_request_id: parsed_body["CheckoutRequestID"],
             response_code: parsed_body["ResponseCode"],
             response_description: parsed_body["ResponseDescription"],
-            customer_message: parsed_body["CustomerMessage"],
+            customer_message: parsed_body["CustomerMessage"]
           )
           OpenStruct.new(result: result, error: nil)
         end
