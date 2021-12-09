@@ -3,6 +3,7 @@ require 'net/http'
 require 'openssl'
 require 'ostruct'
 require 'json'
+require 'base64'
 
 module M
   module Pesa

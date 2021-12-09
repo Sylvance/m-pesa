@@ -7,21 +7,22 @@ require 'base64'
 
 module M
   module Pesa
-    class StkPushViaTillNumber
-      attr_reader :amount, :phone_number, :till_number
+    class B2cPayment
+      attr_reader :amount, :phone_number, :short_code, :command_id
 
-      def self.call(amount:, phone_number:, till_number:)
-        new(amount, phone_number, till_number).call
+      def self.call(amount:, phone_number:, short_code:, command_id:)
+        new(amount, phone_number, short_code, command_id).call
       end
 
-      def initialize(amount, phone_number, till_number)
+      def initialize(amount, phone_number, short_code, command_id)
         @amount = amount
         @phone_number = phone_number
-        @till_number = till_number
+        @short_code = short_code
+        @command_id = command_id
       end
 
       def call
-        url = URI("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest")
+        url = URI("https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest")
 
         http = Net::HTTP.new(url.host, url.port)
         http.use_ssl = true
@@ -60,21 +61,29 @@ module M
 
       def body
         {
-          "BusinessShortCode": till_number,
-          "Password": password,
-          "Timestamp": timestamp.to_s,
-          "TransactionType": "CustomerBuyGoodsOnline",
+          "InitiatorName": "M-pesa Gem",
+          "SecurityCredential": security_credential,
+          "CommandID": command_id, # SalaryPayment, BusinessPayment, PromotionPayment
           "Amount": amount,
-          "PartyA": phone_number,
-          "PartyB": till_number,
-          "PhoneNumber": phone_number,
-          "CallBackURL": M::Pesa.configuration.callback_url,
-          "TransactionDesc": M::Pesa.configuration.default_description
-        }
+          "PartyA": short_code,
+          "PartyB": phone_number,
+          "Remarks": remarks,
+          "QueueTimeOutURL": timeout_url,
+          "ResultURL": result_url,
+          "Occasion": occasion
+       }
+      end
+
+      def security_credential
+        file = File.read(File.join(File.dirname(__FILE__), "#{M::Pesa.configuration.security_credential_file_location}"))
+
+        cert = OpenSSL::X509::Certificate.new(file)
+        key = cert.public_key
+        Base64.strict_encode64(key.public_encrypt(password))
       end
 
       def password
-        Base64.strict_encode64("#{till_number}#{M::Pesa.configuration.pass_key}#{timestamp}")
+        Base64.strict_encode64("#{short_code}#{M::Pesa.configuration.pass_key}#{timestamp}")
       end
 
       def timestamp
