@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'uri'
 require 'net/http'
 require 'openssl'
@@ -36,13 +38,17 @@ module M
         parsed_body = JSON.parse(response.read_body)
 
         if parsed_body.key?("errorCode")
-          error = OpenStruct.new(error_code: parsed_body["errorCode"], error_message: parsed_body["errorMessage"], request_id: parsed_body["requestId"])
+          error = OpenStruct.new(
+            error_code: parsed_body["errorCode"],
+            error_message: parsed_body["errorMessage"],
+            request_id: parsed_body["requestId"]
+          )
           OpenStruct.new(result: nil, error: error)
         else
           result = OpenStruct.new(
             originator_converstion_id: parsed_body["OriginatorConverstionID"],
-            conversation_id: parsed_body["conversation_id"],
-            response_description: parsed_body["response_description"]
+            response_code: parsed_body["ResponseCode"],
+            response_description: parsed_body["ResponseDescription"]
           )
           OpenStruct.new(result: result, error: nil)
         end
@@ -58,10 +64,10 @@ module M
 
       def body
         {
-          "ShortCode": M::Pesa.configuration.short_code || short_code,
-          "ResponseType": M::Pesa.configuration.response_type || response_type,
-          "ConfirmationURL": M::Pesa.configuration.confirmation_url || confirmation_url,
-          "ValidationURL": M::Pesa.configuration.validation_url || validation_url
+          "ShortCode": short_code,
+          "ResponseType": response_type, # Cancelled Completed
+          "ConfirmationURL": confirmation_url,
+          "ValidationURL": validation_url
         }
       end
     end

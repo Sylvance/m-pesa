@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'uri'
 require 'net/http'
 require 'openssl'
@@ -17,13 +19,17 @@ module M
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
         request = Net::HTTP::Get.new(url)
-        request.basic_auth(M::Pesa.configuration.username, M::Pesa.configuration.password)
+        request.basic_auth(M::Pesa.configuration.consumer_key, M::Pesa.configuration.consumer_secret)
 
         response = http.request(request)
         parsed_body = JSON.parse(response.read_body)
 
         if parsed_body.key?("errorCode")
-          error = OpenStruct.new(error_code: parsed_body["errorCode"], error_message: parsed_body["errorMessage"], request_id: parsed_body["requestId"])
+          error = OpenStruct.new(
+            error_code: parsed_body["errorCode"],
+            error_message: parsed_body["errorMessage"],
+            request_id: parsed_body["requestId"]
+          )
           OpenStruct.new(result: nil, error: error)
         else
           result = OpenStruct.new(access_token: parsed_body["access_token"], expires_in: parsed_body["expires_in"])

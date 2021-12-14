@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'uri'
 require 'net/http'
 require 'openssl'
@@ -6,7 +8,7 @@ require 'json'
 
 module M
   module Pesa
-    class C2bViaTillNumber
+    class SimulateC2bViaTillNumber
       attr_reader :amount, :phone_number, :till_number
 
       def self.call(amount:, phone_number:, till_number:)
@@ -35,7 +37,11 @@ module M
         parsed_body = JSON.parse(response.read_body)
 
         if parsed_body.key?("errorCode")
-          error = OpenStruct.new(error_code: parsed_body["errorCode"], error_message: parsed_body["errorMessage"], request_id: parsed_body["requestId"])
+          error = OpenStruct.new(
+            error_code: parsed_body["errorCode"],
+            error_message: parsed_body["errorMessage"],
+            request_id: parsed_body["requestId"]
+          )
           OpenStruct.new(result: nil, error: error)
         else
           result = OpenStruct.new(

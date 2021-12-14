@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
 require_relative "pesa/authorization"
-require_relative "pesa/c2b_via_paybill_number"
-require_relative "pesa/c2b_via_till_number"
+require_relative "pesa/b2c_payment"
+require_relative "pesa/register_urls"
+require_relative "pesa/reversal"
+require_relative "pesa/simulate_c2b_via_paybill_number"
+require_relative "pesa/simulate_c2b_via_till_number"
+require_relative "pesa/stk_push_status"
 require_relative "pesa/stk_push_via_paybill_number"
 require_relative "pesa/stk_push_via_till_number"
 require_relative "pesa/version"

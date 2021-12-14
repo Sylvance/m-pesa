@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'uri'
 require 'net/http'
 require 'openssl'
@@ -8,16 +10,15 @@ require 'base64'
 module M
   module Pesa
     class Reversal
-      attr_reader :amount, :phone_number, :till_number
+      attr_reader :amount, :transaction_id, :short_code
 
-      def self.call(amount:, phone_number: nil, till_number: nil, short_code: nil)
-        new(amount, phone_number, till_number, short_code).call
+      def self.call(amount:, transaction_id: nil, short_code: nil)
+        new(amount, transaction_id, short_code).call
       end
 
-      def initialize(amount, phone_number, till_number, short_code)
+      def initialize(amount, transaction_id, short_code)
         @amount = amount
-        @phone_number = phone_number
-        @till_number = till_number
+        @transaction_id = transaction_id
         @short_code = short_code
       end
 
@@ -37,13 +38,17 @@ module M
         parsed_body = JSON.parse(response.read_body)
 
         if parsed_body.key?("errorCode")
-          error = OpenStruct.new(error_code: parsed_body["errorCode"], error_message: parsed_body["errorMessage"], request_id: parsed_body["requestId"])
+          error = OpenStruct.new(
+            error_code: parsed_body["errorCode"],
+            error_message: parsed_body["errorMessage"],
+            request_id: parsed_body["requestId"]
+          )
           OpenStruct.new(result: nil, error: error)
         else
           result = OpenStruct.new(
             originator_converstion_id: parsed_body["OriginatorConverstionID"],
-            conversation_id: parsed_body["conversation_id"],
-            response_description: parsed_body["response_description"]
+            response_code: parsed_body["ResponseCode"],
+            response_description: parsed_body["ResponseDescription"]
           )
           OpenStruct.new(result: result, error: nil)
         end
@@ -59,22 +64,46 @@ module M
 
       def body
         {
-          "Initiator": "",
-          "SecurityCredential": "",
+          "Initiator": "M-pesa Gem",
+          "SecurityCredential": security_credential,
           "CommandID": "TransactionReversal",
-          "TransactionID": "",
+          "TransactionID": transaction_id,
           "Amount": amount,
-          "ReceiverParty": "",
+          "ReceiverParty": short_code,
           "RecieverIdentifierType": "4",
-          "ResultURL": "",
-          "QueueTimeOutURL": "",
-          "Remarks": "",
-          "Occasion": ""
+          "Remarks": remarks,
+          "QueueTimeOutURL": M::Pesa.configuration.queue_time_out_url,
+          "ResultURL": M::Pesa.configuration.result_url,
+          "Occasion": occasion
         }
       end
 
+      def security_credential
+        cert = OpenSSL::X509::Certificate.new(file_data)
+        key = cert.public_key
+
+        Base64.strict_encode64(key.public_encrypt(password))
+      end
+
+      def file_data
+        file = File.open(cert_file_path)
+        data = file.read
+        file.close
+
+        data
+      end
+
+      def cert_file_path
+        File.join(File.dirname(__FILE__), file_path)
+      end
+
+      def file_path
+        return 'certificates/SandboxCertificate.cer' if M::Pesa.configuration.enviroment == 'sandbox'
+        return 'certificates/ProductionCertificate.cer' if M::Pesa.configuration.enviroment == 'production'
+      end
+
       def password
-        Base64.strict_encode64("#{till_number}#{M::Pesa.configuration.pass_key}#{timestamp}")
+        Base64.strict_encode64("#{short_code}#{M::Pesa.configuration.pass_key}#{timestamp}")
       end
 
       def timestamp
