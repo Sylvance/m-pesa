@@ -10,16 +10,18 @@ require 'base64'
 module M
   module Pesa
     class Reversal
-      attr_reader :amount, :transaction_id, :short_code
+      attr_reader :amount, :transaction_id, :short_code, :remarks, :occasion
 
-      def self.call(amount:, transaction_id: nil, short_code: nil)
-        new(amount, transaction_id, short_code).call
+      def self.call(amount:, transaction_id:, short_code:, remarks:, occasion:)
+        new(amount, transaction_id, short_code, remarks, occasion).call
       end
 
-      def initialize(amount, transaction_id, short_code)
+      def initialize(amount, transaction_id, short_code, remarks, occasion)
         @amount = amount
         @transaction_id = transaction_id
         @short_code = short_code
+        @remarks = remarks
+        @occasion = occasion
       end
 
       def call

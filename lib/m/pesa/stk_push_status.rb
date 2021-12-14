@@ -68,7 +68,7 @@ module M
         {
           "BusinessShortCode": short_code,
           "Password": password,
-          "Timestamp": timestamp,
+          "Timestamp": timestamp.to_s,
           "CheckoutRequestID": checkout_request_id
         }
       end

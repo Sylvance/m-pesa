@@ -39,7 +39,7 @@ RSpec.describe M::Pesa do
 
   it "can register urls successfully" do
     response = M::Pesa::RegisterUrls.call(
-      short_code: 174379,
+      short_code: 123454,
       response_type: 'Completed',
       confirmation_url: 'https://www.youtube.com/callback',
       validation_url: 'https://www.youtube.com/callback'
@@ -52,7 +52,9 @@ RSpec.describe M::Pesa do
     response = M::Pesa::Reversal.call(
       amount: 10,
       transaction_id: 'asdf',
-      short_code: 174379
+      short_code: 174379,
+      remarks: 'Just a random remark',
+      occasion: 'Just a random occassion'
     )
 
     expect(response.error).to be nil
@@ -76,7 +78,7 @@ RSpec.describe M::Pesa do
 
   it "can get stk push status successfully" do
     response = M::Pesa::StkPushStatus.call(
-      checkout_request_id: 'asdf', short_code: 174379
+      checkout_request_id: checkout_request_id, short_code: 174379
     )
 
     expect(response.error).to be nil

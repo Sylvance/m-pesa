@@ -18,12 +18,16 @@ module M
 
     def self.configuration
       @configuration ||= OpenStruct.new(
-        username: nil,
-        password: nil,
+        consumer_key: nil,
+        consumer_secret: nil,
         pass_key: nil,
         short_code: nil,
+        response_type: nil,
         callback_url: nil,
-        default_description: nil
+        result_url: nil,
+        queue_time_out_url: nil,
+        default_description: nil,
+        enviroment: nil
       )
     end
 
