@@ -6,7 +6,7 @@ require 'openssl'
 require 'ostruct'
 require 'json'
 
-module M
+module Mobile
   module Pesa
     class Authorization
       def initialize; end
@@ -19,7 +19,7 @@ module M
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
         request = Net::HTTP::Get.new(url)
-        request.basic_auth(M::Pesa.configuration.consumer_key, M::Pesa.configuration.consumer_secret)
+        request.basic_auth(Mobile::Pesa.configuration.consumer_key, Mobile::Pesa.configuration.consumer_secret)
 
         response = http.request(request)
         parsed_body = JSON.parse(response.read_body)

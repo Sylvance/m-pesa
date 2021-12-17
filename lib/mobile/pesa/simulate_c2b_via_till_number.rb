@@ -6,7 +6,7 @@ require 'openssl'
 require 'ostruct'
 require 'json'
 
-module M
+module Mobile
   module Pesa
     class SimulateC2bViaTillNumber
       attr_reader :amount, :phone_number, :till_number
@@ -60,7 +60,7 @@ module M
       private
 
       def token
-        M::Pesa::Authorization.call.result.access_token
+        Mobile::Pesa::Authorization.call.result.access_token
       end
 
       def body

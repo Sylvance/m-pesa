@@ -5,25 +5,25 @@ require 'net/http'
 require 'openssl'
 require 'ostruct'
 require 'json'
+require 'base64'
 
-module M
+module Mobile
   module Pesa
-    class SimulateC2bViaPaybillNumber
-      attr_reader :amount, :phone_number, :account_number, :pay_bill_number
+    class StkPushViaTillNumber
+      attr_reader :amount, :phone_number, :till_number
 
-      def self.call(amount:, phone_number:, account_number:, pay_bill_number:)
-        new(amount, phone_number, account_number, pay_bill_number).call
+      def self.call(amount:, phone_number:, till_number:)
+        new(amount, phone_number, till_number).call
       end
 
-      def initialize(amount, phone_number, account_number, pay_bill_number)
+      def initialize(amount, phone_number, till_number)
         @amount = amount
         @phone_number = phone_number
-        @account_number = account_number
-        @pay_bill_number = pay_bill_number
+        @till_number = till_number
       end
 
       def call
-        url = URI("https://sandbox.safaricom.co.ke/mpesa/c2b/v1/simulate")
+        url = URI("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest")
 
         http = Net::HTTP.new(url.host, url.port)
         http.use_ssl = true
@@ -61,17 +61,30 @@ module M
       private
 
       def token
-        M::Pesa::Authorization.call.result.access_token
+        Mobile::Pesa::Authorization.call.result.access_token
       end
 
       def body
         {
-          "ShortCode": pay_bill_number,
-          "CommandID": "CustomerPayBillOnline",
+          "BusinessShortCode": till_number,
+          "Password": password,
+          "Timestamp": timestamp.to_s,
+          "TransactionType": "CustomerBuyGoodsOnline",
           "Amount": amount,
-          "Msisdn": phone_number,
-          "BillRefNumber": account_number
+          "PartyA": phone_number,
+          "PartyB": till_number,
+          "PhoneNumber": phone_number,
+          "CallBackURL": Mobile::Pesa.configuration.callback_url,
+          "TransactionDesc": Mobile::Pesa.configuration.default_description
         }
+      end
+
+      def password
+        Base64.strict_encode64("#{till_number}#{Mobile::Pesa.configuration.pass_key}#{timestamp}")
+      end
+
+      def timestamp
+        Time.now.strftime('%Y%m%d%H%M%S').to_i
       end
     end
   end

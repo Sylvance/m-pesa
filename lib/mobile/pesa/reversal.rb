@@ -7,7 +7,7 @@ require 'ostruct'
 require 'json'
 require 'base64'
 
-module M
+module Mobile
   module Pesa
     class Reversal
       attr_reader :amount, :transaction_id, :short_code, :remarks, :occasion
@@ -61,12 +61,12 @@ module M
       private
 
       def token
-        M::Pesa::Authorization.call.result.access_token
+        Mobile::Pesa::Authorization.call.result.access_token
       end
 
       def body
         {
-          "Initiator": "M-pesa Gem",
+          "Initiator": "mobile-pesa Gem",
           "SecurityCredential": security_credential,
           "CommandID": "TransactionReversal",
           "TransactionID": transaction_id,
@@ -74,8 +74,8 @@ module M
           "ReceiverParty": short_code,
           "RecieverIdentifierType": "4",
           "Remarks": remarks,
-          "QueueTimeOutURL": M::Pesa.configuration.queue_time_out_url,
-          "ResultURL": M::Pesa.configuration.result_url,
+          "QueueTimeOutURL": Mobile::Pesa.configuration.queue_time_out_url,
+          "ResultURL": Mobile::Pesa.configuration.result_url,
           "Occasion": occasion
         }
       end
@@ -100,12 +100,12 @@ module M
       end
 
       def file_path
-        return 'certificates/SandboxCertificate.cer' if M::Pesa.configuration.enviroment == 'sandbox'
-        return 'certificates/ProductionCertificate.cer' if M::Pesa.configuration.enviroment == 'production'
+        return 'certificates/SandboxCertificate.cer' if Mobile::Pesa.configuration.enviroment == 'sandbox'
+        return 'certificates/ProductionCertificate.cer' if Mobile::Pesa.configuration.enviroment == 'production'
       end
 
       def password
-        Base64.strict_encode64("#{short_code}#{M::Pesa.configuration.pass_key}#{timestamp}")
+        Base64.strict_encode64("#{short_code}#{Mobile::Pesa.configuration.pass_key}#{timestamp}")
       end
 
       def timestamp

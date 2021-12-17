@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    m-pesa (0.1.1)
+    mobile-pesa (0.1.1)
       colorize
 
 GEM
@@ -48,7 +48,7 @@ PLATFORMS
   x86_64-darwin-21
 
 DEPENDENCIES
-  m-pesa!
+  mobile-pesa!
   rake (~> 13.0)
   rspec (~> 3.0)
   rubocop (~> 1.7)

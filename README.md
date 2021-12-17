@@ -1,4 +1,4 @@
-# M::Pesa
+# Mobile::Pesa
 
 Mpesa gem. This gem helps you carry out operations for Mpesa the easy way.
 
@@ -7,7 +7,7 @@ Mpesa gem. This gem helps you carry out operations for Mpesa the easy way.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'm-pesa'
+gem 'mobile-pesa'
 ```
 
 And then execute:
@@ -16,7 +16,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install m-pesa
+    $ gem install mobile-pesa
 
 ## Usage
 
@@ -30,7 +30,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/m-pesa.
+Bug reports and pull requests are welcome on GitHub at https://github.com/Sylvance/mobile-pesa.
 
 ## License
 

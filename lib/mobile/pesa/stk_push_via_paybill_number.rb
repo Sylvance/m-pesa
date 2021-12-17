@@ -7,7 +7,7 @@ require 'ostruct'
 require 'json'
 require 'base64'
 
-module M
+module Mobile
   module Pesa
     class StkPushViaPaybillNumber
       attr_reader :amount, :phone_number, :account_number, :pay_bill_number
@@ -62,7 +62,7 @@ module M
       private
 
       def token
-        M::Pesa::Authorization.call.result.access_token
+        Mobile::Pesa::Authorization.call.result.access_token
       end
 
       def body
@@ -75,14 +75,14 @@ module M
           "PartyA": phone_number,
           "PartyB": pay_bill_number,
           "PhoneNumber": phone_number,
-          "CallBackURL": M::Pesa.configuration.callback_url,
+          "CallBackURL": Mobile::Pesa.configuration.callback_url,
           "AccountReference": account_number,
           "TransactionDesc": "Payment of X"
         }
       end
 
       def password
-        Base64.strict_encode64("#{pay_bill_number}#{M::Pesa.configuration.pass_key}#{timestamp}")
+        Base64.strict_encode64("#{pay_bill_number}#{Mobile::Pesa.configuration.pass_key}#{timestamp}")
       end
 
       def timestamp

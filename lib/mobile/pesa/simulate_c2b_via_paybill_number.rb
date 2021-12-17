@@ -5,24 +5,25 @@ require 'net/http'
 require 'openssl'
 require 'ostruct'
 require 'json'
-require 'base64'
 
-module M
+module Mobile
   module Pesa
-    class StkPushStatus
-      attr_reader :checkout_request_id, :short_code
+    class SimulateC2bViaPaybillNumber
+      attr_reader :amount, :phone_number, :account_number, :pay_bill_number
 
-      def self.call(checkout_request_id:, short_code:)
-        new(checkout_request_id, short_code).call
+      def self.call(amount:, phone_number:, account_number:, pay_bill_number:)
+        new(amount, phone_number, account_number, pay_bill_number).call
       end
 
-      def initialize(checkout_request_id, short_code)
-        @checkout_request_id = checkout_request_id
-        @short_code = short_code
+      def initialize(amount, phone_number, account_number, pay_bill_number)
+        @amount = amount
+        @phone_number = phone_number
+        @account_number = account_number
+        @pay_bill_number = pay_bill_number
       end
 
       def call
-        url = URI("https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query")
+        url = URI("https://sandbox.safaricom.co.ke/mpesa/c2b/v1/simulate")
 
         http = Net::HTTP.new(url.host, url.port)
         http.use_ssl = true
@@ -49,8 +50,7 @@ module M
             checkout_request_id: parsed_body["CheckoutRequestID"],
             response_code: parsed_body["ResponseCode"],
             response_description: parsed_body["ResponseDescription"],
-            result_desc: parsed_body["ResultDesc"],
-            result_code: parsed_body["ResultCode"]
+            customer_message: parsed_body["CustomerMessage"]
           )
           OpenStruct.new(result: result, error: nil)
         end
@@ -61,24 +61,17 @@ module M
       private
 
       def token
-        M::Pesa::Authorization.call.result.access_token
+        Mobile::Pesa::Authorization.call.result.access_token
       end
 
       def body
         {
-          "BusinessShortCode": short_code,
-          "Password": password,
-          "Timestamp": timestamp.to_s,
-          "CheckoutRequestID": checkout_request_id
+          "ShortCode": pay_bill_number,
+          "CommandID": "CustomerPayBillOnline",
+          "Amount": amount,
+          "Msisdn": phone_number,
+          "BillRefNumber": account_number
         }
-      end
-
-      def password
-        Base64.strict_encode64("#{short_code}#{M::Pesa.configuration.pass_key}#{timestamp}")
-      end
-
-      def timestamp
-        Time.now.strftime('%Y%m%d%H%M%S').to_i
       end
     end
   end
